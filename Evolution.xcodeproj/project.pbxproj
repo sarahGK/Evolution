@@ -7,11 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C92BBE5E1985F0DD008A8CC2 /* Traits.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92BBE5D1985F0DD008A8CC2 /* Traits.swift */; };
+		C92BBE601985F171008A8CC2 /* Decks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92BBE5F1985F171008A8CC2 /* Decks.swift */; };
 		C96EC7671973073600FDDF2A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96EC7661973073600FDDF2A /* AppDelegate.swift */; };
 		C96EC7691973073600FDDF2A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96EC7681973073600FDDF2A /* ViewController.swift */; };
 		C96EC76C1973073600FDDF2A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C96EC76A1973073600FDDF2A /* Main.storyboard */; };
 		C96EC76E1973073600FDDF2A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C96EC76D1973073600FDDF2A /* Images.xcassets */; };
 		C96EC77A1973073700FDDF2A /* EvolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96EC7791973073700FDDF2A /* EvolutionTests.swift */; };
+		C96EC784197307A700FDDF2A /* EvolutionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96EC783197307A700FDDF2A /* EvolutionModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,6 +28,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C92BBE5D1985F0DD008A8CC2 /* Traits.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Traits.swift; sourceTree = "<group>"; };
+		C92BBE5F1985F171008A8CC2 /* Decks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Decks.swift; sourceTree = "<group>"; };
 		C96EC7611973073600FDDF2A /* Evolution.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Evolution.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C96EC7651973073600FDDF2A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C96EC7661973073600FDDF2A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -34,6 +39,7 @@
 		C96EC7731973073700FDDF2A /* EvolutionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EvolutionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C96EC7781973073700FDDF2A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C96EC7791973073700FDDF2A /* EvolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvolutionTests.swift; sourceTree = "<group>"; };
+		C96EC783197307A700FDDF2A /* EvolutionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvolutionModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +63,9 @@
 		C96EC7581973073600FDDF2A = {
 			isa = PBXGroup;
 			children = (
+				C92BBE5F1985F171008A8CC2 /* Decks.swift */,
+				C92BBE5D1985F0DD008A8CC2 /* Traits.swift */,
+				C96EC783197307A700FDDF2A /* EvolutionModel.swift */,
 				C96EC7631973073600FDDF2A /* Evolution */,
 				C96EC7761973073700FDDF2A /* EvolutionTests */,
 				C96EC7621973073600FDDF2A /* Products */,
@@ -209,6 +218,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C96EC7691973073600FDDF2A /* ViewController.swift in Sources */,
+				C92BBE601985F171008A8CC2 /* Decks.swift in Sources */,
+				C96EC784197307A700FDDF2A /* EvolutionModel.swift in Sources */,
+				C92BBE5E1985F0DD008A8CC2 /* Traits.swift in Sources */,
 				C96EC7671973073600FDDF2A /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -397,6 +409,7 @@
 				C96EC77F1973073700FDDF2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C96EC7801973073700FDDF2A /* Build configuration list for PBXNativeTarget "EvolutionTests" */ = {
 			isa = XCConfigurationList;
@@ -405,6 +418,7 @@
 				C96EC7821973073700FDDF2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
