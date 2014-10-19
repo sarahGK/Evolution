@@ -33,6 +33,7 @@ class Game {
     var firstPlayerIndex = 0
     var round = 1
     var maxTraits = 3
+    var hiddenTraits = [Card]() // recently played, hidden traits
     
     init(deckList: DeckList, playerNames: [String]) {
         deck = Deck(game: self, deckList: deckList)
@@ -101,6 +102,13 @@ class Game {
         phase.start(self)
         activePlayer.updateSelectable()
     }
+    
+    func revealTraits() {
+        for card in hiddenTraits {
+            card.isHidden = false
+        }
+        hiddenTraits.removeAll(keepCapacity: false)
+    }
 }
 
 // Anything that can be selected or targeted within a game
@@ -142,6 +150,7 @@ class Card: GameElement {
     let food: Int
     let trait: Trait
     var species: Species?
+    var isHidden = true
     override var description: String {
     get {
         var desc = "\(name)\n\(trait.text)"
@@ -156,6 +165,11 @@ class Card: GameElement {
         super.init(game: game)
         name = "\(trait.name) \(food)"
     }
+    
+    func discard() {
+        self.isHidden = false
+        game.discardPile.addCard(self)
+    }
 }
 
 protocol Phase {
@@ -166,7 +180,7 @@ class StartGame: Phase {
     func start(game: Game) {
         game.deck.shuffle()
         for player in game.players {
-            player.species.append(Species(game:game))
+            player.species.append(Species(player:player))
             player.isDone = true
         }
         game.firstPlayerIndex = Int(arc4random_uniform(UInt32(game.players.count)))
@@ -204,6 +218,7 @@ class SelectFood: Phase {
 class RevealFood: Phase {
     func start(game: Game) {
         game.wateringHole.revealFood()
+        game.revealTraits()
 
 //TODO: Process Leaf Traits before setting isDone
         for player in game.players {
@@ -341,7 +356,7 @@ class Player: GameElement {
     
     func discard(card: Card) {
         removeCard(card)
-        game.discardPile.addCard(card)
+        card.discard()
     }
     
     func endTurn() {
@@ -436,6 +451,7 @@ class DiscardPile: GameElement {
 }
 
 class Species: GameElement {
+    unowned let owner: Player
     var population = 1
     var size = 1
     var foodEaten = 0
@@ -449,6 +465,11 @@ class Species: GameElement {
     override var name: String {
         get { return "\(population)/\(size) \(namePrefix)\(nameSuffix) \(hashValue)" }
         set {}
+    }
+    
+    init(player: Player) {
+        owner = player
+        super.init(game: player.game)
     }
     
     func canAddCard(card: Card) -> Bool {
@@ -513,6 +534,23 @@ class Species: GameElement {
     }
     }
 
+    func description(player: Player) -> String {
+        var desc = "\(namePrefix)\(nameSuffix)\nPopulation: \(population)\nBody Size: \(size)\nFood Eaten: \(foodEaten)"
+        
+        for card in cards {
+            if card.isHidden {
+                if player == owner {
+                    desc += "\n\(card.trait.name) (hidden)"
+                } else {
+                    desc += "\n(hidden trait)"
+                }
+            } else {
+                desc += "\n\(card.trait.name)"
+            }
+        }
+        return desc
+    }
+    
 //    override var name: String {
 //    get {
 //        return "\(population)/\(size) \(name)"
@@ -605,8 +643,8 @@ class NewSpecies: Action {
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is SpeciesSlot {
             player.discard(source as Card)
-            if target is RightSpeciesSlot { player.species.append(Species(game: player.game)) }
-            else { player.species.insert(Species(game: player.game), atIndex: 0) }
+            if target is RightSpeciesSlot { player.species.append(Species(player: player)) }
+            else { player.species.insert(Species(player: player), atIndex: 0) }
         }
     }
     
@@ -639,7 +677,10 @@ class AddTrait: Action {
         if source is Card && target is Species {
             var species = target as Species
             var card = source as Card
-            if species.addCard(card) { player.removeCard(card) }
+            if species.addCard(card) {
+                player.removeCard(card)
+                source.game.hiddenTraits.append(card)
+            }
         }
     }
 }
