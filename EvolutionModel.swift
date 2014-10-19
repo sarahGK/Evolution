@@ -40,6 +40,8 @@ class Game {
         deck = Deck(game: self, deckList: deckList)
         wateringHole = WateringHole(game: self)
         discardPile = DiscardPile(game: self)
+        viewable.append(wateringHole)
+        viewable.append(discardPile)
         
         var tempPlayers = [Player]()
         for name in playerNames {
@@ -188,7 +190,7 @@ class StartGame: Phase {
     func start(game: Game) {
         game.deck.shuffle()
         for player in game.players {
-            player.species.append(Species(player:player))
+            player.addSpecies(true)
             player.isDone = true
         }
         game.firstPlayerIndex = Int(arc4random_uniform(UInt32(game.players.count)))
@@ -265,10 +267,6 @@ class Player: GameElement {
     let leftSpeciesSlot: LeftSpeciesSlot
     let rightSpeciesSlot: RightSpeciesSlot
     
-// Dictionary of selectable GameElements and a list of GameElements it can target
-// list will be empty if the selection can't be used/can't target anything
-// update with updateSelectable()
-//    var usable = [GameElement: [GameElement: [Action]]]()
     init(name: String, game: Game) {
         leftSpeciesSlot = LeftSpeciesSlot(game: game)
         rightSpeciesSlot = RightSpeciesSlot(game: game)
@@ -285,6 +283,14 @@ class Player: GameElement {
             card.owner = self
             cards.append(card)
         }
+    }
+
+    // Create a new 1/1 species on either left or right of existing species
+    func addSpecies(isLeftSpeciesSlot: Bool) {
+        var newSpecies = Species(player: self)
+        if isLeftSpeciesSlot { species.insert(newSpecies, atIndex: 0) }
+        else { species.append(newSpecies) }
+        game.viewable.append(newSpecies)
     }
 
     func viewable() -> [GameElement] {
@@ -428,6 +434,11 @@ class Deck: GameElement {
 class DiscardPile: GameElement {
     var cards = [Card]()
     
+    override init(game: Game) {
+        super.init(game: game)
+        name = "Discard Pile"
+    }
+
     override func description(player: Player) -> String {
         return "\(cards.count) Cards"
     }
@@ -625,8 +636,7 @@ class NewSpecies: Action {
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is SpeciesSlot {
             player.discard(source as Card)
-            if target is RightSpeciesSlot { player.species.append(Species(player: player)) }
-            else { player.species.insert(Species(player: player), atIndex: 0) }
+            player.addSpecies(target is RightSpeciesSlot ? true : false)
         }
     }
     
