@@ -179,9 +179,9 @@ class ViewController: UIViewController, UIPickerViewDelegate {
     }
     
     func updateDescription() {
-        sourceTextView.text = sources[sourceIndex].description
+        sourceTextView.text = sources[sourceIndex].description(player)
         if (targetIndex != nil) {
-            targetTextView.text = targets[sourceIndex][targetIndex!].description
+            targetTextView.text = targets[sourceIndex][targetIndex!].description(player)
             if (actionIndex != nil) {
                 actionTextView.text = actions[sourceIndex][targetIndex!][actionIndex!].name
             } else {

@@ -119,10 +119,8 @@ class GameElement: Hashable {
 // Unique identifier for GameElement
     let hashValue = getId()
     
-    var description: String {
-    get {
+    func description(player: Player) -> String {
         return name
-    }
     }
   
     init (game: Game) {
@@ -150,13 +148,21 @@ class Card: GameElement {
     let food: Int
     let trait: Trait
     var species: Species?
+    var owner: Player?
     var isHidden = true
-    override var description: String {
-    get {
-        var desc = "\(name)\n\(trait.text)"
+    override func description(player: Player) -> String {
+        var desc = ""
+        if isHidden == false {
+            desc += "\(name)\n\(trait.text)"
+        } else {
+            if player == owner {
+                desc += "\(name) (hidden)\n\(trait.text)"
+            } else {
+                desc += "(hidden trait)"
+            }
+        }
         if species != nil { desc += "\n\(species!.name)" }
         return desc
-    }
     }
     
     init(trait:Trait, food:Int, game: Game) {
@@ -167,7 +173,9 @@ class Card: GameElement {
     }
     
     func discard() {
-        self.isHidden = false
+        owner = nil
+        species = nil
+        isHidden = false
         game.discardPile.addCard(self)
     }
 }
@@ -192,7 +200,7 @@ class StartGame: Phase {
 class DealCards: Phase {
     func start(game: Game) {
         for player in game.players {
-            player.cards += game.deck.drawCards(3 + player.species.count)
+            player.drawCards(3 + player.species.count)
             player.isDone = true
         }
     }
@@ -270,10 +278,15 @@ class Player: GameElement {
 //        updateSelectable()
     }
     
-    override var description: String {
-    get {
+    override func description(player: Player) -> String {
         return "\(name)\nFood Eaten: \(foodEaten)\nCards: \(cards.count)\nIs Done: \(isDone)"
     }
+    
+    func drawCards(num: Int) {
+        for card in game.deck.removeCards(num) {
+            card.owner = self
+            cards.append(card)
+        }
     }
 
     var selectableElements: [GameElement] {
@@ -417,7 +430,11 @@ class Deck: GameElement {
         self.cards = deckList.getDeck(game)
     }
     
-    func drawCards(number: Int) -> [Card] {
+     override func description(player: Player) -> String {
+        return "\(cards.count) Cards"
+    }
+    
+    func removeCards(number: Int) -> [Card] {
         if (self.cards.count < number) {
             shuffle()
         }
@@ -437,9 +454,12 @@ class Deck: GameElement {
 
 class DiscardPile: GameElement {
     var cards = [Card]()
+    
+    override func description(player: Player) -> String {
+        return "\(cards.count) Cards"
+    }
 
     func addCard(card:Card) {
-        card.species = nil
         cards.append(card)
     }
     
@@ -495,7 +515,7 @@ class Species: GameElement {
         if !canReplaceCard(oldCard, newCard: newCard) { return false }
         cards[find(traits, oldCard.trait)!] = newCard
         newCard.species = self
-        game.discardPile.addCard(oldCard)
+        oldCard.discard()
         return true
     }
 
@@ -523,18 +543,9 @@ class Species: GameElement {
         return true
     }
 
-    override var description: String {
-    get {
-        var desc = "\(namePrefix)\(nameSuffix)\nPopulation: \(population)\nBody Size: \(size)\nFood Eaten: \(foodEaten)"
-        
-        for card in cards {
-            desc += "\n\(card.trait.name)"
-        }
-        return desc
-    }
-    }
+   
 
-    func description(player: Player) -> String {
+    override func description(player: Player) -> String {
         var desc = "\(namePrefix)\(nameSuffix)\nPopulation: \(population)\nBody Size: \(size)\nFood Eaten: \(foodEaten)"
         
         for card in cards {
@@ -573,10 +584,8 @@ class WateringHole: GameElement {
         name = "Watering Hole"
     }
     
-    override var description: String {
-    get {
+    override func description(player: Player) -> String {
         return "Watering Hole\nCards: \(cards.count)\nFood: \(food)"
-    }
     }
     
     func addCard(card:Card) {
@@ -586,7 +595,7 @@ class WateringHole: GameElement {
     func revealFood() {
         for card in cards {
             food += card.food;
-            game.discardPile.addCard(card)
+            card.discard()
         }
         if (food < 0) { food = 0 }
         cards = []
