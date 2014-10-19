@@ -34,6 +34,7 @@ class Game {
     var round = 1
     var maxTraits = 3
     var hiddenTraits = [Card]() // recently played, hidden traits
+    var viewable = [GameElement]() // GameElements viewable (with double tap) by all players
     
     init(deckList: DeckList, playerNames: [String]) {
         deck = Deck(game: self, deckList: deckList)
@@ -43,6 +44,7 @@ class Game {
         var tempPlayers = [Player]()
         for name in playerNames {
             var player = Player(name: name, game: self)
+            viewable.append(player)
             tempPlayers.append(player)
         }
         players = tempPlayers
@@ -56,7 +58,6 @@ class Game {
     
     func nextPlayer() -> Player {
         activePlayerIndex = (activePlayerIndex + 1) % players.count
-        activePlayer.updateSelectable()
         return activePlayer
     }
     
@@ -100,7 +101,6 @@ class Game {
     
     func executePhase() {
         phase.start(self)
-        activePlayer.updateSelectable()
     }
     
     func revealTraits() {
@@ -268,14 +268,12 @@ class Player: GameElement {
 // Dictionary of selectable GameElements and a list of GameElements it can target
 // list will be empty if the selection can't be used/can't target anything
 // update with updateSelectable()
-//    var selectable = [GameElement(): [(GameElement(), Action())]]
-    var selectable = [GameElement: [GameElement: [Action]]]()
+//    var usable = [GameElement: [GameElement: [Action]]]()
     init(name: String, game: Game) {
         leftSpeciesSlot = LeftSpeciesSlot(game: game)
         rightSpeciesSlot = RightSpeciesSlot(game: game)
         super.init(game: game)
         self.name = name
-//        updateSelectable()
     }
     
     override func description(player: Player) -> String {
@@ -289,36 +287,17 @@ class Player: GameElement {
         }
     }
 
-    var selectableElements: [GameElement] {
-        return [GameElement](selectable.keys)
+    func viewable() -> [GameElement] {
+        return game.viewable + cards
     }
     
-    var usableElements: [GameElement] {
-    get {
-        var usable = [GameElement]()
-        for (element, value) in selectable {
-            if value.count > 0 { usable.append(element) }
-        }
-        return usable
-    }
-    }
-    
-    func isUsable(e: GameElement) -> Bool {
-        if selectable[e] != nil && selectable[e]!.count > 0 { return true }
-        return false
-    }
-    
-    func updateSelectable() {
-        selectable = [GameElement: [GameElement: [Action]]]()
-        for player in game.players {
-            selectable[player] = [:]
-        }
-        selectable[game.wateringHole] = [:]
+    func usable() -> [GameElement: [GameElement: [Action]]] {
+        var usable = [GameElement: [GameElement: [Action]]]()
         
         switch game.phase {
         case is SelectFood:
             for card in cards {
-                selectable[card] = [game.wateringHole: [AddFood()]]
+                usable[card] = [game.wateringHole: [AddFood()]]
             }
         case is PlayCards:
             for card in cards {
@@ -329,18 +308,17 @@ class Player: GameElement {
                     var actions = [Action]()
                     if individual.population < maxPopulation { actions.append(IncreasePopulation()) }
                     if individual.size < maxSize { actions.append(IncreaseSize()) }
-
+                    
                     if individual.canAddCard(card) { actions.append(AddTrait()) }
                     if actions.count > 0 { selections[individual] = actions }
-
+                    
                     for oldCard in individual.cards {
                         if individual.canReplaceCard(oldCard, newCard: card) {
                             selections[oldCard] = [ReplaceTrait()]
                         }
                     }
-
                 }
-                selectable[card] = selections
+                usable[card] = selections
             }
         case is RevealFood:
             for individual in species {
@@ -348,17 +326,12 @@ class Player: GameElement {
                     
                 }
             }
-        default:
-            for card in cards {
-                selectable[card] = [:]
-            }
+        default: break
         }
         
-        for individual in species {
-            selectable[individual] = [:]
-        }
+        if usable.count == 0 { isDone = true }
         
-        if usableElements.count == 0 { isDone = true }
+        return usable
     }
     
     func removeCard(card: Card) {

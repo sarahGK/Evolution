@@ -53,23 +53,23 @@ class ViewController: UIViewController, UIPickerViewDelegate {
         sources = [GameElement]()
         targets = [[GameElement]]()
         actions = [[[Action]]]()
-        var (i,j) = (0,0)
+        var i = 0
 
-        player.updateSelectable()
-        for source in player.selectable.keys {
-            j = 0
+        for (source, targetAction) in player.usable() {
+            sources.append(source)
+            targets.append([])
+            actions.append([])
+            for (target, actionList) in targetAction {
+                targets[i].append(target)
+                actions[i].append(actionList)
+            }
+            i++
+        }
+
+        for source in player.viewable() {
             sources.append(source)
             targets.append([])
             actions.append([[]])
-            for target in player.selectable[source]!.keys {
-                targets[i].append(target)
-                actions[i].append([])
-                if let actionList = player.selectable[source]![target] {
-                    actions[i][j] = actionList
-                }
-                j++
-            }
-            i++
         }
     }
     
