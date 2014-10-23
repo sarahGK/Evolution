@@ -23,6 +23,17 @@ func getId() -> Int {
 let maxPopulation = 6
 let maxSize = 6
 
+// Allow [Target: [Action]] Merging
+func += <K,A> (inout left: [K:[A]], right: [K:[A]]) {
+    for (k, v) in right {
+        if left[k] == nil {
+            left[k] = v
+        } else {
+            left[k] = left[k]! + right[k]!
+        }
+    }
+}
+
 class Game {
     var players: [Player]!
     let deck: Deck!
@@ -221,6 +232,13 @@ class Player: GameElement {
         else { species.append(newSpecies) }
         game.viewable.append(newSpecies)
     }
+    
+    func speciesSlot(individual: Species) -> Int? {
+        for slot in 0 ..< species.count {
+            if species[slot] == individual { return slot }
+        }
+        return nil
+    }
 
     func viewable() -> [GameElement] {
         return game.viewable + cards
@@ -262,7 +280,7 @@ class Player: GameElement {
                     if hasUsed { continue }
                     if let leafFunc = individual.leafFunc[trait] {
                         //TODO: Merge selections
-                        selections = leafFunc(individual)
+                        selections += leafFunc(individual)
                     }
                 }
                 if (selections.count > 0) { usable[individual] = selections }
@@ -472,6 +490,11 @@ class Species: GameElement {
         return true
     }
     
+//    func findCard(trait: Trait) -> Card {
+//        if find(traits, trait) == nil { return false }
+//        return true
+//    }
+    
     func increaseSize() -> Bool {
         if size >= maxSize { return false }
         size++
@@ -499,7 +522,12 @@ class Species: GameElement {
         } else if from == game.foodBank {
             game.foodBank.removeFood(&amount)
         }
-        foodEaten += amount
+        
+        if foodEaten < population {
+            foodEaten += amount
+        } else if fatTissue < size {
+            fatTissue! += amount
+        }
     }
     
 //    func eatMeat(amount: Int) {
@@ -540,6 +568,10 @@ class Species: GameElement {
 
     override func description(player: Player) -> String {
         var desc = "\(namePrefix)\(nameSuffix)\nPopulation: \(population)\nBody Size: \(size)\nFood Eaten: \(foodEaten)"
+        //TODO: Only show if not hidden
+        if let fat = fatTissue { desc += " (\(fat) fat)" }
+        desc += "\n\(owner.name)"
+        if let slot = player.speciesSlot(self) { desc += " slot \(slot)" }
         
         for card in cards {
             if card.isHidden {

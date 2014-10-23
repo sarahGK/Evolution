@@ -9,10 +9,12 @@
 import Foundation
 
 protocol Phase {
+    var name: String { get }
     func start(game: Game)
 }
 
 class StartGame: Phase {
+    let name = "Start Game"
     func start(game: Game) {
         game.deck.shuffle()
         for player in game.players {
@@ -26,6 +28,7 @@ class StartGame: Phase {
 }
 
 class DealCards: Phase {
+    let name = "Deal Cards"
     func start(game: Game) {
         for player in game.players {
             player.drawCards(3 + player.species.count)
@@ -35,6 +38,7 @@ class DealCards: Phase {
 }
 
 class SelectFood: Phase {
+    let name = "Select Food"
     func start(game: Game) {
     }
     
@@ -52,6 +56,7 @@ class SelectFood: Phase {
 }
 
 class RevealFood: Phase {
+    let name = "Reveal Food"
     func start(game: Game) {
         game.wateringHole.revealFood()
         game.revealTraits()
@@ -70,12 +75,14 @@ class RevealFood: Phase {
 }
 
 class PlayCards: Phase {
+    let name = "Play Cards"
     func start(game: Game) {
         
     }
 }
 
 class EndRound: Phase {
+    let name = "End Round"
     func start(game: Game) {
         for player in game.players {
             player.isDone = true

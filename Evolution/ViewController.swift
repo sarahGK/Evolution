@@ -16,6 +16,7 @@ class ViewController: UIViewController, UIPickerViewDelegate {
     @IBOutlet var sourcePicker: UIPickerView!
     @IBOutlet weak var actionButton: UIButton!
     @IBOutlet weak var endTurnButton: UIButton!
+    @IBOutlet weak var phaseLabel: UILabel!
     
     var game = Game(deckList: standardDeck, playerNames: ["Sarah", "Matt"])
 //TODO: Handle non-active players
@@ -147,6 +148,7 @@ class ViewController: UIViewController, UIPickerViewDelegate {
         }
 
         playerLabel.text = player.name
+        phaseLabel.text = game.phase.name
         updateDescription()
     }
     

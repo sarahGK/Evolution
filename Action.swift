@@ -43,7 +43,7 @@ class NewSpecies: Action {
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is SpeciesSlot {
             player.discard(source as Card)
-            player.addSpecies(target is RightSpeciesSlot ? true : false)
+            player.addSpecies(target is LeftSpeciesSlot ? true : false)
         }
     }
     
@@ -128,6 +128,24 @@ class takePlantFood: Action {
 // Leaf abilities like Long Neck can only be used once
             if let trait = ability {
                 species.leafUsed[trait] = true
+            }
+        }
+    }
+}
+
+class TransferFatTissue: Action {
+    let name = "Transfer Fat Tissue"
+    func perform(player: Player, source: GameElement, target: GameElement) {
+        if target is Species {
+            var species = target as Species
+            if var amount = species.fatTissue {
+                if species.population <= species.foodEaten {
+                    amount = 0
+                } else if species.population < species.foodEaten + amount {
+                    amount = species.population - species.foodEaten
+                }
+                species.foodEaten += amount
+                species.fatTissue! -= amount
             }
         }
     }

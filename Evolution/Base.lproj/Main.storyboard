@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6205" systemVersion="13E28" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6245" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6198"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6238"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -13,7 +13,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Ue1-SZ-LAL"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="Source Details" translatesAutoresizingMaskIntoConstraints="NO" id="7vS-mv-tj7">
@@ -80,17 +80,21 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Phase" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gyE-K2-Q2W">
+                                <rect key="frame" x="567" y="20" width="173" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics">
-                        <size key="portraitSize" width="768" height="1024"/>
-                        <size key="landscapeSize" width="1024" height="768"/>
-                    </simulatedScreenMetrics>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
                     <connections>
                         <outlet property="actionButton" destination="KFv-4X-SCj" id="7IK-Dm-B0V"/>
                         <outlet property="actionTextView" destination="pAM-cL-jdS" id="mC3-4d-MDp"/>
                         <outlet property="endTurnButton" destination="IPT-ka-NQx" id="wy3-Hv-ac1"/>
+                        <outlet property="phaseLabel" destination="gyE-K2-Q2W" id="jfH-AZ-5Oq"/>
                         <outlet property="playerLabel" destination="CIT-we-upK" id="9fR-p9-BGD"/>
                         <outlet property="sourcePicker" destination="Oa9-v5-XO0" id="XLu-bB-Eh8"/>
                         <outlet property="sourceTextView" destination="7vS-mv-tj7" id="Eej-zb-pZM"/>

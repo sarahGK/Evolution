@@ -85,8 +85,27 @@ let defensiveherdingTrait = Trait(
 let fattissueTrait = Trait(
     id:   7,
     name: "Fat Tissue",
-    text: "This species can store food on this card up to its Body Size."
+    text: "This species can store food on this card up to its Body Size.",
+    attach: fattissueAttach,
+    detach: fattissueDetach
 )
+
+func fattissueSelectFunc(species: Species) -> [GameElement: [Action]] {
+    if species.fatTissue > 0 && species.foodEaten < species.population {
+        return [species: [TransferFatTissue()]]
+    }
+    return [:]
+}
+
+func fattissueAttach(species: Species) {
+    species.fatTissue = 0
+    species.addLeaf(fattissueTrait, fattissueSelectFunc)
+}
+
+func fattissueDetach(species: Species) {
+    species.fatTissue = nil
+    species.removeLeaf(fattissueTrait)
+}
 
 let fertileTrait = Trait(
     id:   8,
