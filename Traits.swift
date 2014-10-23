@@ -12,6 +12,10 @@ class Trait: Hashable {
     let hashValue: Int
     let name: String
     let text: String
+    let attachFunc: (Species -> ())?
+    let detachFunc: (Species -> ())?
+//    var leaf: (
+
 //    let hasLeaf: Bool
 
 //    unowned let game: Game
@@ -21,10 +25,20 @@ class Trait: Hashable {
 //        super.init()
 //    }
     
-    init(id:Int, name:String, text:String) {
+    init(id:Int, name:String, text:String, attach: (Species -> ())? = nil, detach: (Species -> ())? = nil) {
         self.hashValue = id
         self.name = name
         self.text = text
+        attachFunc = attach
+        detachFunc = detach
+    }
+    
+    func attach(species: Species) {
+        if let f = attachFunc { f(species) }
+    }
+    
+    func detach(species: Species) {
+        if let f = detachFunc { f(species) }
     }
 }
 
@@ -77,8 +91,26 @@ let fattissueTrait = Trait(
 let fertileTrait = Trait(
     id:   8,
     name: "Fertile",
-    text: "When the Food Cards are revealed, increase this species' Population by 1."
+    text: "When the Food Cards are revealed, increase this species' Population by 1.",
+    attach: fertileAttach,
+    detach: fertileDetach
 )
+
+func fertileSelectFunc(species: Species) -> [GameElement: [Action]] {
+    if species.population < maxPopulation {
+        return [species: [IncreasePopulation(ability: fertileTrait)]]
+    }
+    return [:]
+}
+
+func fertileAttach(species: Species) {
+    species.addLeaf(fertileTrait, fertileSelectFunc)
+}
+
+func fertileDetach(species: Species) {
+    species.removeLeaf(fertileTrait)
+}
+
 
 let foragingTrait = Trait(
     id:   9,
@@ -107,8 +139,25 @@ let intelligenceTrait = Trait(
 let longneckTrait = Trait(
     id:   13,
     name: "Long Neck",
-    text: "When the Food Cards are revealed, take 1 Plant Food from the Food Bank."
+    text: "When the Food Cards are revealed, take 1 Plant Food from the Food Bank.",
+    attach: longneckAttach,
+    detach: longneckDetach
 )
+
+func longneckSelectFunc(species: Species) -> [GameElement: [Action]] {
+    if species.canEat() {
+        return [species.game.foodBank: [takePlantFood(ability: longneckTrait)]]
+    }
+    return [:]
+}
+
+func longneckAttach(species: Species) {
+    species.addLeaf(longneckTrait, longneckSelectFunc)
+}
+
+func longneckDetach(species: Species) {
+    species.removeLeaf(longneckTrait)
+}
 
 let packhuntingTrait = Trait(
     id:   14,

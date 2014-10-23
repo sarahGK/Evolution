@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C908C1D719F88B160093A44F /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = C908C1D619F88B160093A44F /* Action.swift */; };
+		C908C1D919F8961B0093A44F /* Phase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C908C1D819F8961B0093A44F /* Phase.swift */; };
 		C92BBE5E1985F0DD008A8CC2 /* Traits.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92BBE5D1985F0DD008A8CC2 /* Traits.swift */; };
 		C92BBE601985F171008A8CC2 /* Decks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92BBE5F1985F171008A8CC2 /* Decks.swift */; };
 		C96EC7671973073600FDDF2A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96EC7661973073600FDDF2A /* AppDelegate.swift */; };
@@ -28,6 +30,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C908C1D619F88B160093A44F /* Action.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
+		C908C1D819F8961B0093A44F /* Phase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Phase.swift; sourceTree = "<group>"; };
 		C92BBE5D1985F0DD008A8CC2 /* Traits.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Traits.swift; sourceTree = "<group>"; };
 		C92BBE5F1985F171008A8CC2 /* Decks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Decks.swift; sourceTree = "<group>"; };
 		C96EC7611973073600FDDF2A /* Evolution.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Evolution.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -63,6 +67,8 @@
 		C96EC7581973073600FDDF2A = {
 			isa = PBXGroup;
 			children = (
+				C908C1D819F8961B0093A44F /* Phase.swift */,
+				C908C1D619F88B160093A44F /* Action.swift */,
 				C92BBE5F1985F171008A8CC2 /* Decks.swift */,
 				C92BBE5D1985F0DD008A8CC2 /* Traits.swift */,
 				C96EC783197307A700FDDF2A /* EvolutionModel.swift */,
@@ -218,6 +224,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C96EC7691973073600FDDF2A /* ViewController.swift in Sources */,
+				C908C1D719F88B160093A44F /* Action.swift in Sources */,
+				C908C1D919F8961B0093A44F /* Phase.swift in Sources */,
 				C92BBE601985F171008A8CC2 /* Decks.swift in Sources */,
 				C96EC784197307A700FDDF2A /* EvolutionModel.swift in Sources */,
 				C92BBE5E1985F0DD008A8CC2 /* Traits.swift in Sources */,

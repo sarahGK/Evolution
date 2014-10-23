@@ -28,6 +28,7 @@ class Game {
     let deck: Deck!
     let discardPile: DiscardPile!
     let wateringHole: WateringHole!
+    let foodBank: FoodBank!
     var phase: Phase = StartGame()
     var activePlayerIndex = 0
     var firstPlayerIndex = 0
@@ -39,6 +40,7 @@ class Game {
     init(deckList: DeckList, playerNames: [String]) {
         deck = Deck(game: self, deckList: deckList)
         wateringHole = WateringHole(game: self)
+        foodBank = FoodBank(game: self)
         discardPile = DiscardPile(game: self)
         viewable.append(wateringHole)
         viewable.append(discardPile)
@@ -91,6 +93,7 @@ class Game {
         for player in players {
             player.isDone = false
         }
+        activePlayerIndex = firstPlayerIndex
         switch phase {
         case is StartGame: phase = DealCards()
         case is DealCards: phase = SelectFood()
@@ -175,88 +178,13 @@ class Card: GameElement {
     }
     
     func discard() {
+        if let s = species { trait.detach(s) }
         owner = nil
         species = nil
         isHidden = false
         game.discardPile.addCard(self)
     }
 }
-
-protocol Phase {
-    func start(game: Game)
-}
-
-class StartGame: Phase {
-    func start(game: Game) {
-        game.deck.shuffle()
-        for player in game.players {
-            player.addSpecies(true)
-            player.isDone = true
-        }
-        game.firstPlayerIndex = Int(arc4random_uniform(UInt32(game.players.count)))
-        game.activePlayerIndex = game.firstPlayerIndex
-        game.endTurn()
-    }
-}
-
-class DealCards: Phase {
-    func start(game: Game) {
-        for player in game.players {
-            player.drawCards(3 + player.species.count)
-            player.isDone = true
-        }
-    }
-}
-
-class SelectFood: Phase {
-    func start(game: Game) {
-    }
-
-//TODO: Change Card to a generic to support other phases
-//    func selections() -> ((Game, Player) -> [Card]) {
-//        func selectFoodCard(game: Game, player: Player) -> [Card] {
-//            return player.cards
-//        }
-//        return selectFoodCard
-//    }
-    
-//    func action() -> ((Game, Card) -> ()) {
-//        func selectFoodAction
-//    }
-}
-
-class RevealFood: Phase {
-    func start(game: Game) {
-        game.wateringHole.revealFood()
-        game.revealTraits()
-
-//TODO: Process Leaf Traits before setting isDone
-        for player in game.players {
-            player.isDone = true
-        }
-    }
-}
-
-class PlayCards: Phase {
-    func start(game: Game) {
-        
-    }
-}
-
-class EndRound: Phase {
-    func start(game: Game) {
-        for player in game.players {
-            player.isDone = true
-        }
-        // Change the starting player for the next round
-        game.firstPlayerIndex = (game.firstPlayerIndex + 1) % game.players.count
-        game.round++
-    }
-}
-
-//class GameOver: Phase {
-//    
-//}
 
 //TODO: Remove GameElement if player can't be selected/targeted
 class Player: GameElement {
@@ -266,6 +194,7 @@ class Player: GameElement {
     var isDone = false
     let leftSpeciesSlot: LeftSpeciesSlot
     let rightSpeciesSlot: RightSpeciesSlot
+    var leafCards = [Card]()
     
     init(name: String, game: Game) {
         leftSpeciesSlot = LeftSpeciesSlot(game: game)
@@ -328,9 +257,15 @@ class Player: GameElement {
             }
         case is RevealFood:
             for individual in species {
-                for trait in individual.traits {
-                    
+                var selections = [GameElement: [Action]]()
+                for (trait, hasUsed) in individual.leafUsed {
+                    if hasUsed { continue }
+                    if let leafFunc = individual.leafFunc[trait] {
+                        //TODO: Merge selections
+                        selections = leafFunc(individual)
+                    }
                 }
+                if (selections.count > 0) { usable[individual] = selections }
             }
         default: break
         }
@@ -354,7 +289,7 @@ class Player: GameElement {
     func endTurn() {
         game.endTurn()
     }
-    
+
 // List of GameElements the player can select
 //    func canSelect() -> [GameElement] {
 //        var selectable: [GameElement] = game.players
@@ -459,11 +394,16 @@ class Species: GameElement {
     var population = 1
     var size = 1
     var foodEaten = 0
+    var fatTissue: Int?
     var cards = [Card]()
     var traits: [Trait] {
         get { return map(cards) { $0.trait } }
     }
-//    var dtraits = [Trait: Bool]()
+    // whether a leaf trait has been used during reveal Food or not
+    var leafUsed = [Trait: Bool]()
+    // function to determine selections for a leaf trait
+    var leafFunc: [Trait: (Species) -> [GameElement: [Action]]] = [:]
+
     var namePrefix = "mini"
     var nameSuffix = "lack"
     override var name: String {
@@ -481,6 +421,24 @@ class Species: GameElement {
         if hasTrait(card.trait) { return false }
         return true
     }
+    
+//TODO: Handle plant vs. meat
+    func canEat() -> Bool {
+        if foodEaten < population { return true }
+        if let fat = fatTissue {
+            if fat < size { return true }
+        }
+        return false
+    }
+    
+// Returns amount of food species can Eat
+    func canEatAmount() -> Int {
+        if foodEaten < population { return population - foodEaten }
+        if let fat = fatTissue {
+            if fat < size { return size - fat }
+        }
+        return 0
+    }
 
     func canReplaceCard(oldCard: Card, newCard: Card) -> Bool {
         if !hasCard(oldCard) { return false }
@@ -492,6 +450,7 @@ class Species: GameElement {
         if !canAddCard(card) { return false }
         card.species = self
         cards.append(card)
+        card.trait.attach(self)
         return true
     }
 
@@ -526,8 +485,58 @@ class Species: GameElement {
         if population > 3 && nameSuffix == "lack" { nameSuffix = "peeps" }
         return true
     }
+    
+    func eatPlant(var amount: Int, var from: GameElement? = nil) {
+        //TODO: Carnivores don't eat plant food
+        if amount > canEatAmount() { amount = canEatAmount() }
+        if from == nil { from = game.wateringHole }
+        if from == game.wateringHole && amount > game.wateringHole.food { amount = game.wateringHole.food }
+        if amount <= 0 { return }
 
-   
+        //TODO: Check for cooperation
+        if from == game.wateringHole {
+            game.wateringHole.removeFood(&amount)
+        } else if from == game.foodBank {
+            game.foodBank.removeFood(&amount)
+        }
+        foodEaten += amount
+    }
+    
+//    func eatMeat(amount: Int) {
+//    }
+    
+    // Notification revealFood has begun
+    // Bool - was this used?
+    // Method to determine valid source/target/action
+    // Method to use Leaf
+    // Method to remove
+    func addLeaf(trait: Trait, leafFunc: Species -> [GameElement: [Action]]) {
+        leafUsed[trait] = false
+        self.leafFunc[trait] = leafFunc
+    }
+    
+    func removeLeaf(trait: Trait) {
+        leafUsed[trait] = nil
+        leafFunc[trait] = nil
+    }
+
+    func resetLeafUsed() {
+        for trait in leafUsed.keys {
+            leafUsed[trait] = false
+        }
+    }
+    
+//    func leafSelections() -> [GameElement: [GameElement: [Action]]] {
+//        var selections = [GameElement: [GameElement: [Action]]]()
+//        for trait in leafUsed.keys {
+//            if leafUsed[trait] != true { continue }
+//            if let leafFunc = leafFunc[trait] {
+//                //TODO: Merge selections
+//                selections = leafFunc(self)
+//            }
+//        }
+//        return selections
+//    }
 
     override func description(player: Player) -> String {
         var desc = "\(namePrefix)\(nameSuffix)\nPopulation: \(population)\nBody Size: \(size)\nFood Eaten: \(foodEaten)"
@@ -545,18 +554,6 @@ class Species: GameElement {
         }
         return desc
     }
-    
-//    override var name: String {
-//    get {
-//        return "\(population)/\(size) \(name)"
-//    }
-//    }
-
-//    init() {
-//        super.init()
-//        name = "\(population)/\(size) \(self.name)"
-//    }
-    //func canAttack() -> Species[] {}
 }
 
 class WateringHole: GameElement {
@@ -584,6 +581,30 @@ class WateringHole: GameElement {
         if (food < 0) { food = 0 }
         cards = []
     }
+    
+    // Try to take amount food from the watering
+    // amount will be changed to actual amount taken
+    func removeFood(inout amount: Int) {
+        if amount <= food {
+            food -= amount
+        } else if food <= 0 {
+            amount = 0
+        } else {
+            amount = food
+            food = 0
+        }
+    }
+}
+
+class FoodBank: GameElement {
+    override init(game: Game) {
+        super.init(game: game)
+        name = "Food Bank"
+    }
+
+    // Try to take amount food from the watering
+    // amount will be changed to actual amount taken
+    func removeFood(inout amount: Int) { }
 }
 
 class SpeciesSlot: GameElement { }
@@ -601,95 +622,3 @@ class RightSpeciesSlot: SpeciesSlot {
         name = "Right Species Slot"
     }
 }
-
-protocol Action {
-    var name: String { get }
-//    func perform(player: Player, source: GameElement, target: GameElement, parameters: [Parameter])
-    func perform(player: Player, source: GameElement, target: GameElement)
-//    var description: String { get }
-}
-
-class EndTurn: Action {
-    let name = "End Turn"
-
-    func perform(player: Player, source: GameElement, target: GameElement) {
-        player.isDone = true
-    }
-}
-
-class AddFood: Action {
-    let name = "Add Food"
-
-    func perform(player: Player, source: GameElement, target: GameElement) {
-        if source is Card && target is WateringHole {
-            var card = source as Card
-            player.removeCard(card)
-            player.game.wateringHole.addCard(card)
-            player.endTurn()
-        }
-    }
-}
-
-class NewSpecies: Action {
-    let name = "New Species"
-    
-    func perform(player: Player, source: GameElement, target: GameElement) {
-        if source is Card && target is SpeciesSlot {
-            player.discard(source as Card)
-            player.addSpecies(target is RightSpeciesSlot ? true : false)
-        }
-    }
-    
-}
-
-class IncreasePopulation: Action {
-    let name = "Increase Population"
-    func perform(player: Player, source: GameElement, target: GameElement) {
-        if source is Card && target is Species {
-            var species = target as Species
-            if species.increasePopulation() { player.discard(source as Card) }
-        }
-    }
-}
-
-class IncreaseSize: Action {
-    let name = "Increase Size"
-    func perform(player: Player, source: GameElement, target: GameElement) {
-        if source is Card && target is Species {
-            var species = target as Species
-            if species.increaseSize() { player.discard(source as Card) }
-        }
-    }
-}
-
-class AddTrait: Action {
-    var name = "Add Trait"
-    
-    func perform(player: Player, source: GameElement, target: GameElement) {
-        if source is Card && target is Species {
-            var species = target as Species
-            var card = source as Card
-            if species.addCard(card) {
-                player.removeCard(card)
-                source.game.hiddenTraits.append(card)
-            }
-        }
-    }
-}
-
-class ReplaceTrait: Action {
-    var name = "Replace Trait"
-    
-    func perform(player: Player, source: GameElement, target: GameElement) {
-        if source is Card && target is Card {
-            var oldCard = target as Card
-            var newCard = source as Card
-            if let species = oldCard.species {
-                if species.replaceCard(oldCard, newCard: newCard) { player.removeCard(newCard) }
-            }
-        }
-    }
-}
-
-// Additional parameters for an action
-//class Parameter {}
