@@ -18,7 +18,7 @@ class ViewController: UIViewController, UIPickerViewDelegate {
     @IBOutlet weak var endTurnButton: UIButton!
     @IBOutlet weak var phaseLabel: UILabel!
     
-    var game = Game(deckList: standardDeck, playerNames: ["Sarah", "Matt"])
+    var game = Game(deckList: standardDeck, playerNames: ["Sarah", "Matt", "Dominic", "Scott"])
 //TODO: Handle non-active players
     var player: Player {
         get {
@@ -164,7 +164,7 @@ class ViewController: UIViewController, UIPickerViewDelegate {
         return actionCount
     }
     
-    func pickerView(pickerView: UIPickerView!, titleForRow row: Int, forComponent component: Int) -> String
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String
     {
         if component == 0 { return sources[row].name }
         if component == 1 && row < targetCount { return targets[sourceIndex][row].name }
@@ -172,7 +172,7 @@ class ViewController: UIViewController, UIPickerViewDelegate {
         return ""
     }
 
-    func pickerView(pickerView: UIPickerView!, didSelectRow row: Int, inComponent component: Int) {
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
 //        if component == 0 {
 //            sourcePicker.reloadAllComponents()
 //            updateDescription()

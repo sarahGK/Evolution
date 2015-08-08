@@ -99,7 +99,7 @@ func fattissueSelectFunc(species: Species) -> [GameElement: [Action]] {
 
 func fattissueAttach(species: Species) {
     species.fatTissue = 0
-    species.addLeaf(fattissueTrait, fattissueSelectFunc)
+    species.addLeaf(fattissueTrait, leafFunc: fattissueSelectFunc)
 }
 
 func fattissueDetach(species: Species) {
@@ -123,7 +123,7 @@ func fertileSelectFunc(species: Species) -> [GameElement: [Action]] {
 }
 
 func fertileAttach(species: Species) {
-    species.addLeaf(fertileTrait, fertileSelectFunc)
+    species.addLeaf(fertileTrait, leafFunc: fertileSelectFunc)
 }
 
 func fertileDetach(species: Species) {
@@ -171,7 +171,7 @@ func longneckSelectFunc(species: Species) -> [GameElement: [Action]] {
 }
 
 func longneckAttach(species: Species) {
-    species.addLeaf(longneckTrait, longneckSelectFunc)
+    species.addLeaf(longneckTrait, leafFunc: longneckSelectFunc)
 }
 
 func longneckDetach(species: Species) {

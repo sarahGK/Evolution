@@ -29,7 +29,7 @@ class AddFood: Action {
     
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is WateringHole {
-            var card = source as Card
+            var card = source as! Card
             player.removeCard(card)
             player.game.wateringHole.addCard(card)
             player.endTurn()
@@ -42,7 +42,7 @@ class NewSpecies: Action {
     
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is SpeciesSlot {
-            player.discard(source as Card)
+            player.discard(source as! Card)
             player.addSpecies(target is LeftSpeciesSlot ? true : false)
         }
     }
@@ -58,9 +58,9 @@ class IncreasePopulation: Action {
 
     func perform(player: Player, source: GameElement, target: GameElement) {
         if target is Species {
-            var species = target as Species
+            var species = target as! Species
             if species.increasePopulation() {
-                if source is Card { player.discard(source as Card) }
+                if source is Card { player.discard(source as! Card) }
 
             }
             // Leaf abilities like Fertile can only be used once
@@ -75,8 +75,8 @@ class IncreaseSize: Action {
     let name = "Increase Size"
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is Species {
-            var species = target as Species
-            if species.increaseSize() { player.discard(source as Card) }
+            var species = target as! Species
+            if species.increaseSize() { player.discard(source as! Card) }
         }
     }
 }
@@ -86,8 +86,8 @@ class AddTrait: Action {
     
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is Species {
-            var species = target as Species
-            var card = source as Card
+            var species = target as! Species
+            var card = source as! Card
             if species.addCard(card) {
                 player.removeCard(card)
                 source.game.hiddenTraits.append(card)
@@ -101,8 +101,8 @@ class ReplaceTrait: Action {
     
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Card && target is Card {
-            var oldCard = target as Card
-            var newCard = source as Card
+            var oldCard = target as! Card
+            var newCard = source as! Card
             if let species = oldCard.species {
                 if species.replaceCard(oldCard, newCard: newCard) { player.removeCard(newCard) }
                 source.game.hiddenTraits.append(newCard)
@@ -122,7 +122,7 @@ class takePlantFood: Action {
     
     func perform(player: Player, source: GameElement, target: GameElement) {
         if source is Species {
-            var species = source as Species
+            var species = source as! Species
             species.eatPlant(amount, from: target)
 
 // Leaf abilities like Long Neck can only be used once
@@ -137,7 +137,7 @@ class TransferFatTissue: Action {
     let name = "Transfer Fat Tissue"
     func perform(player: Player, source: GameElement, target: GameElement) {
         if target is Species {
-            var species = target as Species
+            var species = target as! Species
             if var amount = species.fatTissue {
                 if species.population <= species.foodEaten {
                     amount = 0

@@ -36,10 +36,11 @@ func += <K,A> (inout left: [K:[A]], right: [K:[A]]) {
 
 class Game {
     var players: [Player]!
-    let deck: Deck!
-    let discardPile: DiscardPile!
-    let wateringHole: WateringHole!
-    let foodBank: FoodBank!
+    //TODO: Revert these back from var to let
+    var deck: Deck!
+    var discardPile: DiscardPile!
+    var wateringHole: WateringHole!
+    var foodBank: FoodBank!
     var phase: Phase = StartGame()
     var activePlayerIndex = 0
     var firstPlayerIndex = 0
